@@ -4,12 +4,17 @@
 The goal of this task was to create a simple application using the **Spring Boot** framework. The application includes a controller that handles HTTP GET requests and returns a simple response. Due to a system conflict, the default port has been changed from `8080` to `8081`.
 
 ## Application Features
-1. **Controller** – handles HTTP GET requests on the root path (`/`) and returns a text message.
+1. **Controller** – handles HTTP GET requests on the root path (`/`) and an additional `/greeting` path.
 2. **Port Configuration** – the application runs on port `8081` instead of the default `8080`.
-3. **Simple Response** – the application returns the message:
-   ```
-   Hello Vistula, in my first Spring controller.
-   ```
+3. **Dynamic Response** – the application returns messages:
+   - At root (`/`):
+     ```
+     Hello Vistula, in my first Spring controller.
+     ```
+   - At `/greeting` with an optional `name` parameter:
+     ```
+     Hello, {name}!
+     ```
 
 ## Port Configuration
 The port was changed by adding the following configuration to the `application.properties` file:
@@ -33,7 +38,11 @@ src
 │   │               └── controller
 │   │                   └── HelloController.java     # Application controller
 │   └── resources
-│       └── application.properties                   # Configuration file
+│       ├── static
+│       │   └── images
+│       │       └── port_1.jpg                       # Static image resource
+│       └── templates
+│           └── greeting.html                        # Thymeleaf template
 └── test
 ```
 
@@ -59,20 +68,49 @@ public class Task1Application {
 ```java
 package com.AL_VIS.Task1.controller;
 
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+@Controller
 public class HelloController {
 
     @GetMapping(value = "/")
     public String hello() {
         return "Hello Vistula, in my first Spring controller.";
     }
+
+    @GetMapping("/greeting")
+    public String greeting(@RequestParam(name = "name", required = false, defaultValue = "World") String name, Model model) {
+        model.addAttribute("name", name);
+        return "greeting";
+    }
 }
 ```
 
-### 3. Configuration File
+### 3. Thymeleaf Template (`greeting.html`)
+```html
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Greeting Page</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+    <h1 th:text="'Hello, ' + ${name} + '!'">Hello!</h1>
+    
+    <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas vestibulum dignissim malesuada.
+    </p>
+
+    <img th:src="@{/images/port_1.jpg}" alt="Port" width="600" height="600"/>
+</body>
+</html>
+```
+
+### 4. Configuration File
 ```properties
 server.port=8081
 spring.application.name=Task1
@@ -95,11 +133,12 @@ spring.application.name=Task1
    java -jar target/Task1-0.0.1-SNAPSHOT.jar
    ```
 5. Open your browser and go to:
-   ```
-   http://localhost:8081/
-   ```
-6. You should see the message:  
-   **Hello Vistula, in my first Spring controller.**
+   - Root path: `http://localhost:8081/`
+   - Greeting path: `http://localhost:8081/greeting?name=YourName`
+
+6. You should see:
+   - Root: **Hello Vistula, in my first Spring controller.**
+   - Greeting: **Hello, YourName!**
 
 ## Software Versions
 - **JDK**: 17+
@@ -107,4 +146,4 @@ spring.application.name=Task1
 - **Maven**: 3.6+
 
 ## Summary
-The application successfully implements the required features, including creating a controller, changing the default port, and returning a simple response to an HTTP GET request. The project is ready for further development or integration with other systems.
+The application successfully implements additional features, including a controller with dynamic responses using Thymeleaf templates and a static image resource. The project is ready for further development or integration with other systems.
